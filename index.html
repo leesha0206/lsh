@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🎁 상현이가 무슨 말을 보냈을까요?</title>
+<style>
+:root{--bg:#fff3e6;--fg:#3b2a20;--card:#fff;--accent:#e8454f;--accent2:#ffc83d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1620;--fg:#fbeee0;--card:#2c2231;--accent:#ff6670;--accent2:#ffd25e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1620;--fg:#fbeee0;--card:#2c2231;--accent:#ff6670;--accent2:#ffd25e;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+h1{font-size:1.4rem;margin:0 0 6px}
+.hint{opacity:.7;margin:0 0 18px;font-size:1rem}
+#box{position:relative;width:180px;height:180px;cursor:pointer;border:0;background:none;padding:0;animation:wiggle 1.6s infinite}
+#box.open,#box.shaking{animation:none;cursor:default}
+.body{position:absolute;bottom:0;left:10px;width:160px;height:110px;background:var(--accent);border-radius:6px}
+.lid{position:absolute;top:28px;left:0;width:180px;height:44px;background:var(--accent);border-radius:6px;border-bottom:4px solid rgba(0,0,0,.15);transition:transform .6s cubic-bezier(.3,1.6,.5,1),opacity .6s;transform-origin:left bottom}
+.ribbon-v{position:absolute;left:76px;width:28px;background:var(--accent2)}
+.body .ribbon-v{top:0;height:100%}
+.lid .ribbon-v{top:0;height:100%;left:76px}
+.bow{position:absolute;top:2px;left:62px;font-size:44px;transition:transform .6s,opacity .6s}
+#box.open .lid{transform:translate(40px,-70px) rotate(25deg);opacity:0}
+#box.open .bow{transform:translate(-30px,-80px) rotate(-30deg);opacity:0}
+@keyframes wiggle{0%,100%{transform:rotate(0)}10%{transform:rotate(-6deg)}20%{transform:rotate(6deg)}30%{transform:rotate(-4deg)}40%{transform:rotate(4deg)}50%{transform:rotate(0)}}
+#msg{max-width:min(86vw,440px);margin-top:26px;padding:20px 22px;background:var(--card);border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.15);font-size:1.25rem;line-height:1.6;white-space:pre-line;opacity:0;transform:translateY(20px) scale(.9);transition:all .5s .3s;pointer-events:none;position:absolute}
+#msg.show{opacity:1;transform:none;pointer-events:auto;position:static}
+#again{display:none;margin-top:16px;padding:8px 18px;border:0;border-radius:20px;background:var(--accent2);color:#3b2a20;font:inherit;cursor:pointer}
+.confetti{position:fixed;top:-20px;font-size:22px;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+</style>
+</head>
+<body>
+<h1 id="title">상현이가 무슨 말을 보냈을까요?</h1>
+<p class="hint" id="hint">상자를 눌러서 열어보세요</p>
+<button id="box" aria-label="선물상자 열기">
+  <div class="body"><div class="ribbon-v"></div></div>
+  <div class="lid"><div class="ribbon-v"></div></div>
+  <div class="bow">🎀</div>
+</button>
+<div id="msg"></div>
+<script>
+// ✏️ 여기에 보여줄 글을 적으세요 (줄바꿈 가능)
+const MESSAGE = "정말 놀랍다";
+
+const box=document.getElementById('box'),msg=document.getElementById('msg'),
+hint=document.getElementById('hint');
+msg.textContent=MESSAGE;
+function confetti(){
+  const e=['🎉','✨','🎊','⭐','💖'];
+  for(let i=0;i<30;i++){
+    const s=document.createElement('span');s.className='confetti';
+    s.textContent=e[i%e.length];s.style.left=Math.random()*100+'vw';
+    s.style.animationDuration=(2+Math.random()*2)+'s';s.style.animationDelay=Math.random()*.5+'s';
+    document.body.appendChild(s);setTimeout(()=>s.remove(),5000);
+  }
+}
+const DURATION=5000; // 흔들리는 시간(ms)
+let started=false;
+box.addEventListener('click',()=>{
+  if(started)return;
+  started=true;
+  box.classList.add('shaking');
+  hint.textContent='두근두근... 😳';
+  const t0=performance.now();let phase=0,last=t0;
+  function frame(now){
+    const p=Math.min((now-t0)/DURATION,1);
+    const freq=1.5+p*p*14;          // 점점 빨라짐 (Hz)
+    const amp=3+p*12;               // 점점 커짐 (deg)
+    phase+=(now-last)/1000*freq*2*Math.PI;last=now;
+    box.style.transform='rotate('+Math.sin(phase)*amp+'deg)';
+    if(p<1){requestAnimationFrame(frame);return;}
+    box.style.transform='';
+    box.classList.remove('shaking');
+    box.classList.add('open');hint.style.visibility='hidden';
+    msg.classList.add('show');confetti();
+  }
+  requestAnimationFrame(frame);
+});
+// 뒤로가기 등으로 다시 들어왔을 때도 처음 상태로 초기화
+addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
+</script>
+</body>
+</html>
